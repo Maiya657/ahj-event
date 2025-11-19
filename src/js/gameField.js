@@ -1,20 +1,13 @@
 import image from "../img/goblin.png";
 
 export class GameField {
-  constructor(
-    stats,
-    containerSelector = "body",
-    itemsCount = 16,
-    limitCount = 5,
-  ) {
+  constructor(stats, containerSelector = "body", itemsCount = 16) {
     this.containerSelector = containerSelector;
     this.itemsCount = itemsCount;
     this.fieldItems = [];
     this.currentIndex = 0;
     this.img = null;
     this.intervalID = null;
-    this.missedCount = 0;
-    this.limitCount = limitCount;
     this.stats = stats;
   }
 
@@ -45,9 +38,7 @@ export class GameField {
     this.img = document.createElement("img");
     this.img.src = image;
     this.img.alt = "Goblin";
-    this.img.addEventListener("click", (e) => {
-      e.preventDefault();
-      this.missedCount = 0;
+    this.img.addEventListener("click", () => {
       this.clearActiveField();
       this.stats.increasePlayerScore();
     });
@@ -68,18 +59,14 @@ export class GameField {
     const activeItem = this.getRandomItem();
     this.clearActiveField();
     activeItem.append(this.img);
-    this.missedCount++;
-    if (this.missedCount > this.limitCount) {
+    this.stats.increasePlayerMissed();
+    if (this.stats.isGameOver()) {
       this.stopGame();
     }
   }
 
   clearActiveField() {
-    this.fieldItems.forEach((item) => {
-      if (item.contains(this.img)) {
-        item.removeChild(this.img);
-      }
-    });
+    this.img.remove();
   }
 
   startGame(interval = 1000) {
@@ -94,5 +81,9 @@ export class GameField {
       this.intervalID = null;
     }
     this.clearActiveField();
+
+    const gameOverField = document.createElement("div");
+    gameOverField.textContent = "Game Over!";
+    document.querySelector(this.containerSelector).append(gameOverField);
   }
 }
